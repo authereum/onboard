@@ -3,6 +3,9 @@
   import { get } from 'svelte/store'
   import { fade } from 'svelte/transition'
   import { onDestroy, onMount } from 'svelte'
+  import { ethers } from "ethers";
+  import StarkwareWallet from "@authereum/starkware-wallet";
+  import StarkwareProvider from "@authereum/starkware-provider";
 
   import { app, walletInterface, wallet, resetWalletState } from '../stores'
 
@@ -136,7 +139,7 @@
 
     loadingWallet = module.name
 
-    const {
+    let {
       provider,
       interface: selectedWalletInterface,
       instance
@@ -192,6 +195,25 @@
 
       return selectedWalletInterface
     })
+
+    const starkConfig = {
+      authMessage: () => 'Sign this example message: 123',
+      exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c'
+    }
+
+    const ethersProvider = new ethers.providers.Web3Provider(provider)
+    const signerWallet = ethersProvider.getSigner()
+    const message = starkConfig?.authMessage()
+    const signature = await signerWallet.signMessage(message)
+    const starkWallet = StarkwareWallet.fromSignature(
+      signature,
+      ethersProvider
+    )
+    provider = new StarkwareProvider(
+      starkWallet,
+      signerWallet as any,
+      starkConfig?.exchangeAddress
+    )
 
     wallet.set({
       provider,

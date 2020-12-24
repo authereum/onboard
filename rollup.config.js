@@ -81,6 +81,9 @@ export default {
     'web3-provider-engine/subproviders/hooked-wallet',
     'web3-provider-engine/subproviders/rpc',
     'web3-provider-engine/subproviders/subscriptions',
-    'web3-provider-engine/subproviders/filters'
+    'web3-provider-engine/subproviders/filters',
+    'ethers',
+    '@authereum/starkware-wallet',
+    '@authereum/starkware-provider'
   ]
 }
