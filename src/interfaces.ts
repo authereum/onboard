@@ -8,6 +8,7 @@ export interface Initialization {
   apiUrl?: string
   hideBranding?: boolean
   blockPollingInterval?: number
+  starkConfig?: StarkConfig
 }
 
 export interface Subscriptions {
@@ -476,4 +477,9 @@ export interface AppState {
 
 export interface CancelablePromise extends Promise<any> {
   cancel: () => void
+}
+
+export interface StarkConfig {
+  authMessage: () => string
+  exchangeAddress: string
 }

@@ -79,7 +79,8 @@ export function validateInit(init: Initialization): never | void {
       'darkMode',
       'apiUrl',
       'hideBranding',
-      'blockPollingInterval'
+      'blockPollingInterval',
+      'starkConfig'
     ],
     'init'
   )

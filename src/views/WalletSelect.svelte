@@ -130,7 +130,7 @@
     autoSelected?: boolean
   ) {
     const currentWalletInterface = get(walletInterface)
-    const { browser, os } = get(app)
+    const { browser, os, starkConfig } = get(app)
 
     if (currentWalletInterface && currentWalletInterface.name === module.name) {
       finish({ completed: true })
@@ -196,24 +196,25 @@
       return selectedWalletInterface
     })
 
-    const starkConfig = {
-      authMessage: () => 'Sign this example message: 123',
-      exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c'
+    if (module.name === 'WalletConnect') {
+      provider = StarkwareProvider.fromWalletConnect(
+        provider.wc
+      )
+    } else if (starkConfig) {
+      const ethersProvider = new ethers.providers.Web3Provider(provider)
+      const signerWallet = ethersProvider.getSigner()
+      const message = starkConfig?.authMessage()
+      const signature = await signerWallet.signMessage(message)
+      const starkWallet = StarkwareWallet.fromSignature(
+        signature,
+        ethersProvider
+      )
+      provider = new StarkwareProvider(
+        starkWallet,
+        signerWallet as any,
+        starkConfig?.exchangeAddress
+      )
     }
-
-    const ethersProvider = new ethers.providers.Web3Provider(provider)
-    const signerWallet = ethersProvider.getSigner()
-    const message = starkConfig?.authMessage()
-    const signature = await signerWallet.signMessage(message)
-    const starkWallet = StarkwareWallet.fromSignature(
-      signature,
-      ethersProvider
-    )
-    provider = new StarkwareProvider(
-      starkWallet,
-      signerWallet as any,
-      starkConfig?.exchangeAddress
-    )
 
     wallet.set({
       provider,
