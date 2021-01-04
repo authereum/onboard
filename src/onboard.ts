@@ -34,7 +34,6 @@ import {
 import initializeModules from './modules'
 
 let onboard: any
-
 function init(initialization: Initialization): API {
   if (onboard) {
     console.warn('onboard has already been initialized')

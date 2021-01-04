@@ -201,19 +201,62 @@
         provider.wc
       )
     } else if (starkConfig) {
-      const ethersProvider = new ethers.providers.Web3Provider(provider)
-      const signerWallet = ethersProvider.getSigner()
-      const message = starkConfig?.authMessage()
-      const signature = await signerWallet.signMessage(message)
-      const starkWallet = StarkwareWallet.fromSignature(
-        signature,
-        ethersProvider
-      )
-      provider = new StarkwareProvider(
-        starkWallet,
-        signerWallet as any,
-        starkConfig?.exchangeAddress
-      )
+      if (module.name === 'Ledger') {
+        const bnProvider = provider
+        const ethersProvider = new ethers.providers.Web3Provider(bnProvider)
+        const signerWallet = ethersProvider.getSigner()
+        const starkWallet = StarkwareWallet.fromLedger(bnProvider.dPath, ethersProvider, bnProvider.getEthApp())
+        provider = new StarkwareProvider(
+          starkWallet,
+          signerWallet as any,
+          starkConfig?.exchangeAddress
+        )
+        provider.setDebug(true)
+        provider.updateAccount(
+          starkConfig.layer,
+          starkConfig.application,
+          starkConfig.index,
+        )
+
+        provider.setPath = (path: string) => {
+          bnProvider.setPath(path)
+          const ethersProvider = new ethers.providers.Web3Provider(bnProvider)
+          const signerWallet = ethersProvider.getSigner()
+          provider.setSigner(signerWallet)
+          return true
+        }
+        provider.setPrimaryAccount = (address: string) => {
+          console.debug('bn', 'address', address)
+        }
+        provider.isCustomPath = () => {
+          return bnProvider.isCustomPath()
+        }
+        provider.disconnect = () => {
+          return bnProvider.disconnect()
+        }
+        provider.getBalances = (addresses: string[] = []) => {
+          console.debug('bn', 'getBalances', addresses)
+          return bnProvider.getBalances(addresses)
+        }
+        provider.getBalance = (address: string) => {
+          console.debug('bn', 'getBalance', address)
+          return bnProvider.getBalance(address)
+        }
+      } else {
+        const ethersProvider = new ethers.providers.Web3Provider(provider)
+        const signerWallet = ethersProvider.getSigner()
+        const message = starkConfig?.authMessage()
+        const signature = await signerWallet.signMessage(message)
+        const starkWallet = StarkwareWallet.fromSignature(
+          signature,
+          ethersProvider
+        )
+        provider = new StarkwareProvider(
+          starkWallet,
+          signerWallet as any,
+          starkConfig?.exchangeAddress
+        )
+      }
     }
 
     wallet.set({

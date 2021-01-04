@@ -482,4 +482,7 @@ export interface CancelablePromise extends Promise<any> {
 export interface StarkConfig {
   authMessage: () => string
   exchangeAddress: string
+  layer: string
+  application: string
+  index: string
 }

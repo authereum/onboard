@@ -145,9 +145,14 @@ async function ledgerProvider(options: {
   provider.send = provider.sendAsync
   provider.disconnect = disconnect
   provider.isCustomPath = isCustomPath
+  provider.getEthApp = getEthApp
 
   let transport: any
   let eth: any
+
+  function getEthApp() {
+    return eth
+  }
 
   function disconnect() {
     transport && transport.close()
@@ -185,11 +190,14 @@ async function ledgerProvider(options: {
 
   async function createTransport() {
     try {
+      console.debug('bn', 'transport create')
       transport = LedgerTransport
         ? await LedgerTransport.create()
         : await TransportU2F.create()
 
+      console.debug('bn', 'new Eth')
       eth = new Eth(transport)
+      console.debug('bn', 'new Eth', eth)
 
       const observer = {
         next: (event: any) => {
@@ -205,6 +213,7 @@ async function ledgerProvider(options: {
         ? LedgerTransport.listen(observer)
         : TransportU2F.listen(observer)
     } catch (error) {
+      console.log(error)
       throw new Error('Error connecting to Ledger wallet')
     }
   }
@@ -236,6 +245,7 @@ async function ledgerProvider(options: {
     }
 
     try {
+      console.debug('bn', 'getAddress', path)
       const result = await eth.getAddress(path)
       return result.address
     } catch (error) {}
@@ -251,6 +261,7 @@ async function ledgerProvider(options: {
     }
 
     try {
+      console.debug('bn', 'getPublicKey', dPath)
       const result = await eth.getAddress(dPath, false, true)
       const { publicKey, chainCode } = result
 
@@ -304,6 +315,7 @@ async function ledgerProvider(options: {
       }
 
       for (const path of paths) {
+        console.debug('bn', 'getAccounts', path)
         const res = await eth.getAddress(path)
         addressToPath.set(res.address, path)
       }
@@ -373,6 +385,7 @@ async function ledgerProvider(options: {
       transaction.raw[7] = buffer.Buffer.from([]) // r
       transaction.raw[8] = buffer.Buffer.from([]) // s
 
+      console.debug('bn', 'signTransaction')
       const ledgerResult = await eth.signTransaction(
         path,
         transaction.serialize().toString('hex')
