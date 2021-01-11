@@ -11,6 +11,7 @@ function authereum(
     name: label || 'Authereum',
     svg,
     iconSrc: iconSrc || authereumIcon,
+    nativeStarkSupport: true,
     wallet: async () => {
       const { default: Authereum } = await import('authereum')
       const instance = new Authereum({

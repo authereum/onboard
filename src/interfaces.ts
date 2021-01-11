@@ -105,6 +105,7 @@ export interface WalletModule {
   iconSrc?: string
   iconSrcSet?: string
   svg?: string
+  nativeStarkSupport?: boolean
   wallet: (
     helpers: Helpers
   ) => Promise<{

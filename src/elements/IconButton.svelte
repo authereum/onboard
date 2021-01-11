@@ -8,6 +8,7 @@
   export let text: string
   export let loadingWallet: string | undefined
   export let currentlySelected: boolean = false
+  export let nativeStarkSupport: boolean = false
 </script>
 
 <style>
@@ -73,6 +74,12 @@
     text-decoration: underline;
   }
 
+  em {
+    font-size: 0.8rem;
+    font-weight: lighter;
+    color: inherit;
+  }
+
   @media only screen and (max-width: 450px) {
     button {
       width: 100%;
@@ -102,6 +109,11 @@
     {text}
     {#if currentlySelected}
       <i>selected</i>
+    {/if}
+    {#if nativeStarkSupport}
+      <em>native</em>
+    {:else}
+      <em>non-native</em>
     {/if}
   </span>
 </button>

@@ -20,6 +20,7 @@ function ledger(options: LedgerOptions & { networkId: number }): WalletModule {
     name: label || 'Ledger',
     svg: svg || ledgerIcon,
     iconSrc,
+    nativeStarkSupport: true,
     wallet: async (helpers: Helpers) => {
       const { BigNumber, networkName, resetWalletState } = helpers
 

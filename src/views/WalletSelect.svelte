@@ -196,6 +196,7 @@
       return selectedWalletInterface
     })
 
+    console.log('bn', 'module', module.name)
     if (module.name === 'WalletConnect') {
       provider = StarkwareProvider.fromWalletConnect(
         provider.wc
@@ -246,6 +247,7 @@
         const ethersProvider = new ethers.providers.Web3Provider(provider)
         const signerWallet = ethersProvider.getSigner()
         const message = starkConfig?.authMessage()
+        await provider.enable()
         const signature = await signerWallet.signMessage(message)
         const starkWallet = StarkwareWallet.fromSignature(
           signature,
