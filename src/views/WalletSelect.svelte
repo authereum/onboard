@@ -199,7 +199,8 @@
     console.log('bn', 'module', module.name)
     if (module.name === 'WalletConnect') {
       provider = StarkwareProvider.fromWalletConnect(
-        provider.wc
+        provider.wc,
+        {debug: true}
       )
     } else if (starkConfig) {
       if (module.name === 'Ledger') {
