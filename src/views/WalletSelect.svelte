@@ -196,13 +196,8 @@
       return selectedWalletInterface
     })
 
-    console.log('bn', 'module', module.name)
-    if (module.name === 'WalletConnect') {
-      provider = StarkwareProvider.fromWalletConnect(
-        provider.wc,
-        {debug: true}
-      )
-    } else if (starkConfig) {
+    console.debug('bn', 'module', module.name)
+    if (starkConfig) {
       if (module.name === 'Ledger') {
         const bnProvider = provider
         const ethersProvider = new ethers.providers.Web3Provider(bnProvider)
@@ -247,18 +242,25 @@
       } else {
         const ethersProvider = new ethers.providers.Web3Provider(provider)
         const signerWallet = ethersProvider.getSigner()
+        console.debug('bn', 'auth message')
         const message = starkConfig?.authMessage()
         await provider.enable()
+        console.debug('bn', 'enabled')
+        console.debug('bn', 'signer wallet address', await signerWallet.getAddress())
         const signature = await signerWallet.signMessage(message)
+        console.debug('bn', 'signature', signature)
         const starkWallet = StarkwareWallet.fromSignature(
           signature,
           ethersProvider
         )
+        console.debug('bn', 'starkWallet', starkWallet)
         provider = new StarkwareProvider(
           starkWallet,
           signerWallet as any,
           starkConfig?.exchangeAddress
         )
+        console.debug('bn', 'starkProvider', provider)
+        provider.setDebug(true)
       }
     }
 
