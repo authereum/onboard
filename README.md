@@ -4,40 +4,45 @@ JavaScript library to easily onboard users to ethereum apps by enabling wallet s
 
 ## Install
 
-`npm install bnc-onboard`
+`npm install @authereum/bnc-onboard@starkware`
 
 ## Quick Start
 
 ```javascript
-import Onboard from 'bnc-onboard'
-import Web3 from 'web3'
+import Onboard from '@authereum/bnc-onboard'
 
-// set a variable to store instantiated web3
-let web3
-
-// head to blocknative.com to create a key
 const BLOCKNATIVE_KEY = 'blocknative-api-key'
+const NETWORK_ID = 3
 
-// the network id that your dapp runs on
-const NETWORK_ID = 1
-
-// initialize onboard
 const onboard = Onboard({
   dappId: BLOCKNATIVE_KEY,
   networkId: NETWORK_ID,
+  starkConfig: {
+    exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c',
+
+    // for non-native integrations, use signature based stark key
+    authMessage: () => 'Example auth message: 123',
+  },
   subscriptions: {
-    wallet: wallet => {
-      // instantiate web3 when the user has selected a wallet
-      web3 = new Web3(wallet.provider)
-      console.log(`${wallet.name} connected!`)
+    wallet: async wallet => {
+      // returns starkware-enable web3 provider
+      const { provider } = wallet.provider
+
+      const layer = 'starkex',
+      const application = 'starkexdemo',
+      const index = '0'
+
+      const starkKey = await provider.account(layer, application, index)
+      console.log(starkKey)
+
+      // see: https://github.com/authereum/starkware-monorepo/tree/starkex-3.0/packages/starkware-provider
+      const txhash = await provider.transfer({from, to, asset, ...})
+      console.log(txhash)
     }
   }
 })
 
-// Prompt user to select a wallet
 await onboard.walletSelect()
-
-// Run wallet checks to make sure that user is ready to transact
 await onboard.walletCheck()
 ```
 
