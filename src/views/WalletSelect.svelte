@@ -240,27 +240,51 @@
           return bnProvider.getBalance(address)
         }
       } else {
-        const ethersProvider = new ethers.providers.Web3Provider(provider)
-        const signerWallet = ethersProvider.getSigner()
-        console.debug('bn', 'auth message')
-        const message = starkConfig?.authMessage()
-        await provider.enable()
-        console.debug('bn', 'enabled')
-        console.debug('bn', 'signer wallet address', await signerWallet.getAddress())
-        const signature = await signerWallet.signMessage(message)
-        console.debug('bn', 'signature', signature)
-        const starkWallet = StarkwareWallet.fromSignature(
-          signature,
-          ethersProvider
-        )
-        console.debug('bn', 'starkWallet', starkWallet)
-        provider = new StarkwareProvider(
-          starkWallet,
-          signerWallet as any,
-          starkConfig?.exchangeAddress
-        )
-        console.debug('bn', 'starkProvider', provider)
-        provider.setDebug(true)
+      let enabled : boolean = false
+        // attempt native support
+        if (module.name === 'WalletConnect') {
+          const starkProvider = StarkwareProvider.fromWalletConnect(
+            provider.wc,
+          )
+          starkProvider.setDebug(true)
+          try {
+            await provider.enable()
+            await starkProvider.updateAccount(
+              starkConfig.layer,
+              starkConfig.application,
+              starkConfig.index,
+            )
+            provider = starkProvider
+            enabled = true
+          } catch(err) {
+            console.error(err)
+          }
+        }
+
+        if (!enabled) {
+          const ethersProvider = new ethers.providers.Web3Provider(provider)
+          const signerWallet = ethersProvider.getSigner()
+          console.debug('bn', 'auth message')
+          const message = starkConfig?.authMessage()
+          await provider.enable()
+          enabled = true
+          console.debug('bn', 'enabled')
+          console.debug('bn', 'signer wallet address', await signerWallet.getAddress())
+          const signature = await signerWallet.signMessage(message)
+          console.debug('bn', 'signature', signature)
+          const starkWallet = StarkwareWallet.fromSignature(
+            signature,
+            ethersProvider
+          )
+          console.debug('bn', 'starkWallet', starkWallet)
+          provider = new StarkwareProvider(
+            starkWallet,
+            signerWallet as any,
+            starkConfig?.exchangeAddress
+          )
+          console.debug('bn', 'starkProvider', provider)
+          provider.setDebug(true)
+        }
       }
     }
 
