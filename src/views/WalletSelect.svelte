@@ -197,8 +197,25 @@
     })
 
     console.debug('bn', 'module', module.name)
+    let enabled : boolean = false
     if (starkConfig) {
-      if (module.name === 'Ledger') {
+      if (module.name === 'Authereum') {
+        const starkProvider = StarkwareProvider.fromAuthereum(
+          provider.authereum
+        )
+        try {
+          await provider.enable()
+          await starkProvider.updateAccount(
+            starkConfig.layer,
+            starkConfig.application,
+            starkConfig.index,
+          )
+          provider = starkProvider
+          enabled = true
+        } catch(err) {
+          console.error(err)
+        }
+      } else if (module.name === 'Ledger') {
         const bnProvider = provider
         const ethersProvider = new ethers.providers.Web3Provider(bnProvider)
         const signerWallet = ethersProvider.getSigner()
@@ -240,7 +257,6 @@
           return bnProvider.getBalance(address)
         }
       } else {
-      let enabled : boolean = false
         // attempt native support
         if (module.name === 'WalletConnect') {
           const starkProvider = StarkwareProvider.fromWalletConnect(
